@@ -86,7 +86,7 @@
         .process-step { font-size: 8rem; color: #111; position: absolute; right: 20px; top: 20px; z-index: -1; }
         .process-content { position: relative; z-index: 2; }
         
-        /* FOOTER */
+        /* FOOTER (THE MONOLITH) */
         footer { background: var(--void); padding: 100px 20px; border-top: 5px solid var(--alert); position: relative; display: flex; justify-content: center; }
         .footer-monolith { width: 100%; max-width: 1400px; border: 3px solid #333; background: #050505; display: flex; flex-direction: column; }
         .monolith-top { display: flex; border-bottom: 3px solid #333; }
@@ -106,22 +106,69 @@
         .defense-link { text-decoration: none; color: var(--alert); font-weight: 900; font-size: 1.1rem; border-bottom: 2px solid var(--alert); transition: 0.2s; padding-bottom: 5px; display: inline-block; margin-top: 10px; }
         .defense-link:hover { background: var(--alert); color: var(--void); }
 
+        /* --- AUDIO CONTROL MODULE (BOTTOM RIGHT) --- */
+        .audio-module {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 10002;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+            mix-blend-mode: difference;
+        }
+
+        .audio-label {
+            font-family: 'JetBrains Mono';
+            font-size: 10px;
+            color: var(--flash);
+            margin-bottom: 5px;
+        }
+
+        .audio-switch {
+            display: flex;
+            border: 2px solid var(--flash);
+            background: #000;
+        }
+
+        .audio-option {
+            padding: 8px 12px;
+            font-family: 'JetBrains Mono';
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            transition: 0.2s;
+            border-right: 1px solid #333;
+        }
+        .audio-option:last-child { border-right: none; }
+        
+        .audio-option:hover { color: #fff; }
+        
+        /* Active States */
+        .audio-option[data-state="lpf"].active { background: var(--flash); color: #000; }
+        .audio-option[data-state="raw"].active { background: var(--alert); color: #000; }
+        .audio-option[data-state="off"].active { background: #333; color: #fff; text-decoration: line-through; }
+
+        /* VISUALIZER */
+        .mini-vis { display: flex; gap: 2px; height: 10px; margin-right: 5px; align-items: flex-end; }
+        .v-bar { width: 3px; background: var(--flash); animation: bounce 0.5s infinite alternate; }
+        .v-bar:nth-child(2) { animation-delay: 0.1s; }
+        .v-bar:nth-child(3) { animation-delay: 0.2s; }
+        @keyframes bounce { 0% { height: 20%; } 100% { height: 100%; } }
+        .audio-module.muted .v-bar { animation: none; height: 2px; }
+
         #aim { position: fixed; width: 40px; height: 40px; border: 3px solid var(--alert); transform: translate(-50%, -50%); z-index: 10005; pointer-events: none; mix-blend-mode: difference; transition: transform 0.1s; }
         
-        /* MOBILE FIXES */
         @media (max-width: 900px) {
              .monolith-top { flex-direction: column; }
              .monolith-logo-section { border-right: none; border-bottom: 3px solid #333; padding: 60px 20px; }
              .footer-logo { font-size: 25vw; }
              .monolith-links-section { align-items: center; text-align: center; }
              .partner-line { justify-content: center; }
-             
-             .social-link { 
-                 margin: 10px 0; 
-                 display: block; 
-                 white-space: normal;
-                 font-size: 1.2rem;
-             }
+             .social-link { margin: 10px 0; display: block; }
+             .audio-module { bottom: 10px; right: 10px; transform: scale(0.8); transform-origin: bottom right; }
         }
     </style>
 </head>
@@ -139,6 +186,20 @@
         <div class="hud-bar bottom" style="margin-top: auto;">
             <span class="hud-text">FPS: <span id="fps">60</span></span>
             <span class="hud-text">YNL_CORP ©</span>
+        </div>
+    </div>
+
+    <div class="audio-module" id="audio-module">
+        <div style="display: flex; align-items: center;">
+            <div class="mini-vis">
+                <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+            </div>
+            <div class="audio-label">AUDIO_CORE</div>
+        </div>
+        <div class="audio-switch">
+            <div class="audio-option active" data-state="lpf" onclick="setAudioMode('lpf')">LPF</div>
+            <div class="audio-option" data-state="raw" onclick="setAudioMode('raw')">RAW</div>
+            <div class="audio-option" data-state="off" onclick="setAudioMode('off')">OFF</div>
         </div>
     </div>
 
@@ -179,13 +240,13 @@
     <section>
         <h2 class="section-header">UNIT OPERATIVES</h2>
         <div class="personnel-grid">
-            <a href="https://www.beatstars.com/prodbyynl" class="operative" target="_blank">
+            <a href="https://www.beatstars.com/ynlstarstore" class="operative" target="_blank">
                 <span class="op-badge">CLEARANCE: LEVEL 5</span>
                 <div class="op-name">ADMIN</div>
                 <div class="op-role">/// HEAD OF OPERATIONS</div>
                 <div class="op-role">/// ACCESS STORE -></div>
             </a>
-            <a href="https://www.instagram.com/prodbyynl/" class="operative" target="_blank">
+            <a href="https://www.instagram.com/ynlstarstore/" class="operative" target="_blank">
                 <span class="op-badge">CLEARANCE: LEVEL 4</span>
                 <div class="op-name">SECURED</div>
                 <div class="op-role">/// SIGNAL PROCESSING</div>
@@ -254,18 +315,22 @@
                 <div class="monolith-logo-section">
                     <div class="footer-logo shake-brutal">YNL*</div>
                 </div>
+                
                 <div class="monolith-links-section">
                     <h3 class="links-header">DEAL WITH YNLSTARSTORE?</h3>
+                    
                     <div style="margin-bottom: 20px;">
-                        <a href="https://www.beatstars.com/prodbyynl" class="social-link" target="_blank">BEATSTARS</a>
-                        <a href="https://www.instagram.com/prodbyynl/" class="social-link" target="_blank">INSTA (EXCLUSIVE)</a>
+                        <a href="https://www.beatstars.com/ynlstarstore" class="social-link" target="_blank">BEATSTARS</a>
+                        <a href="https://www.instagram.com/ynlstarstore/" class="social-link" target="_blank">INSTAGRAM (MORE EXCLUSIVE)</a>
                     </div>
+                    
                     <div class="partner-line">
                         <span style="font-family: 'JetBrains Mono'; font-size: 0.8rem; color: #888;">BECOME A PARTNER:</span>
                         <a href="mailto:ynlorganisation@gmail.com" class="social-link" style="font-size: 1rem; opacity: 0.9; margin: 0; border-bottom-color: #555;">ynlorganisation@gmail.com</a>
                     </div>
                 </div>
             </div>
+
             <div class="monolith-bottom">
                 SYSTEM ID: 492-AX-22 /// LOC: UKRAINE [НЕЗЛАМНА] /// TARGET: WORLDWIDE /// STATUS: ARMED
                 <br><br>
@@ -276,28 +341,132 @@
     </footer>
 
     <script>
-        // --- VISUAL SCRIPTS ONLY ---
+        // --- AUDIO ENGINE v4.0 (BULLETPROOF) ---
+        let audioCtx;
+        let audioSource;
+        let gainNode;
+        let filterNode;
+        let isAudioInit = false;
+        let isSimpleMode = false; 
+        let currentMode = 'lpf'; 
+        
+        // NO crossOrigin needed for local files!
+        const audioElement = new Audio('beat.mp3');
+        audioElement.loop = true;
+
+        function initAudio() {
+            if (isAudioInit) return;
+            
+            try {
+                // Try complex web audio (might fail on local file)
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                
+                audioSource = audioCtx.createMediaElementSource(audioElement);
+                gainNode = audioCtx.createGain();
+                filterNode = audioCtx.createBiquadFilter();
+
+                filterNode.type = 'lowpass';
+                filterNode.Q.value = 1;
+                
+                audioSource.connect(filterNode);
+                filterNode.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                console.log("Audio Engine: Full Mode (LPF Active)");
+            } catch (e) {
+                console.warn("Audio Engine: Fallback Mode (Simple audio only).");
+                isSimpleMode = true; // Fallback to simple volume change
+            }
+
+            isAudioInit = true;
+            
+            // Just play it. Simple mode handles logic inside applyMode
+            audioElement.play().then(() => {
+                applyMode(currentMode);
+            }).catch(e => console.log("Audio Play Error:", e));
+        }
+
+        function setAudioMode(mode) {
+            currentMode = mode;
+            
+            // UI Update
+            document.querySelectorAll('.audio-option').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.audio-option[data-state="${mode}"]`).classList.add('active');
+            
+            const module = document.getElementById('audio-module');
+            if (mode === 'off') module.classList.add('muted');
+            else module.classList.remove('muted');
+
+            if (!isAudioInit) {
+                initAudio(); 
+            } else {
+                applyMode(mode);
+            }
+        }
+
+        function applyMode(mode) {
+            // FALLBACK MODE (NO FILTER)
+            if (isSimpleMode) {
+                if (mode === 'lpf') {
+                    audioElement.volume = 0.3; // Quiet background
+                    audioElement.muted = false;
+                } else if (mode === 'raw') {
+                    audioElement.volume = 1.0; // Full volume
+                    audioElement.muted = false;
+                } else {
+                    audioElement.muted = true; // Mute
+                }
+                return;
+            }
+
+            // FULL MODE (WITH FILTER)
+            const time = audioCtx.currentTime;
+            
+            if (mode === 'lpf') {
+                gainNode.gain.cancelScheduledValues(time);
+                gainNode.gain.linearRampToValueAtTime(1, time + 0.1);
+                filterNode.frequency.cancelScheduledValues(time);
+                filterNode.frequency.exponentialRampToValueAtTime(600, time + 0.5); 
+            } 
+            else if (mode === 'raw') {
+                gainNode.gain.cancelScheduledValues(time);
+                gainNode.gain.linearRampToValueAtTime(1, time + 0.1);
+                filterNode.frequency.cancelScheduledValues(time);
+                filterNode.frequency.exponentialRampToValueAtTime(22000, time + 0.5); 
+            } 
+            else if (mode === 'off') {
+                gainNode.gain.cancelScheduledValues(time);
+                gainNode.gain.linearRampToValueAtTime(0, time + 0.5);
+            }
+        }
+
+        // Global Click Listener to start audio (Autoplay Policy)
+        window.addEventListener('click', () => {
+            if (!isAudioInit) initAudio();
+        }, { once: true });
+
+
+        // --- STANDARD SITE SCRIPTS (FIXED SCROLL ERROR) ---
         window.onscroll = function() {
             var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             var scrolled = (winScroll / height) * 100;
+            // Added check to prevent error if element missing
             const bar = document.getElementById("scroll-progress");
             if (bar) bar.style.width = scrolled + "%";
         };
 
         const ticker = document.getElementById('lens-ticker');
-        if(ticker) {
-            const text = ticker.innerText;
-            ticker.innerHTML = ''; 
-            text.split('').forEach(char => {
-                const span = document.createElement('span');
-                span.innerText = char;
-                span.className = 'lens-char';
-                if (char === ' ') span.style.width = '1rem'; 
-                ticker.appendChild(span);
-            });
-        }
-
+        const text = ticker.innerText;
+        ticker.innerHTML = ''; 
+        text.split('').forEach(char => {
+            const span = document.createElement('span');
+            span.innerText = char;
+            span.className = 'lens-char';
+            if (char === ' ') span.style.width = '1rem'; 
+            ticker.appendChild(span);
+        });
         const chars = document.querySelectorAll('.lens-char');
         document.addEventListener('mousemove', (e) => {
             const mouseX = e.clientX;
@@ -323,7 +492,6 @@
                 }
             });
         });
-
         const canvas = document.getElementById('static-noise');
         const ctx = canvas.getContext('2d');
         const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
@@ -342,13 +510,12 @@
             requestAnimationFrame(generateNoise);
         }
         generateNoise();
-
         const aim = document.getElementById('aim');
         document.addEventListener('mousemove', (e) => {
             aim.style.left = e.clientX + 'px';
             aim.style.top = e.clientY + 'px';
         });
-        document.querySelectorAll('a, .operative, .process-block, .links-box').forEach(el => {
+        document.querySelectorAll('a, .operative, .process-block, .links-box, .audio-option').forEach(el => {
             el.addEventListener('mouseenter', () => {
                 aim.style.transform = 'translate(-50%, -50%) scale(2) rotate(45deg)';
                 aim.style.borderColor = '#ccff00';
@@ -358,13 +525,10 @@
                 aim.style.borderColor = 'var(--alert)';
             });
         });
-
         const fpsEl = document.getElementById('fps');
-        if(fpsEl) {
-            setInterval(() => {
-                fpsEl.innerText = Math.floor(Math.random() * (60 - 55) + 55);
-            }, 500);
-        }
+        setInterval(() => {
+            fpsEl.innerText = Math.floor(Math.random() * (60 - 55) + 55);
+        }, 500);
     </script>
 </body>
 </html>
